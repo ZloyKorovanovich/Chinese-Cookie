@@ -17,6 +17,9 @@ typedef unsigned u32;
 typedef unsigned long u32x;
 typedef unsigned long long u64;
 
+typedef float f32;
+typedef double f64;
+
 #define MIN(a, b) (a < b ? a : b)
 #define MAX(a, b) (a > b ? a : b)
 #define CLAMP(a, b, t) (t < a ? a : (t > b ? b : t))

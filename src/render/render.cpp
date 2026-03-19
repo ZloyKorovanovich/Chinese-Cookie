@@ -5,7 +5,8 @@
 
 struct RenderData {
     HANDLE std_out;
-    CHAR_INFO draw_buffer[RES_X * RES_Y];
+    CHAR_INFO back_buffer[RES_X * RES_Y];
+    CHAR_INFO front_buffer[RES_X * RES_Y];
 };
 
 static RenderData s_render_data = (RenderData){0};
@@ -27,13 +28,13 @@ i32 setupDrawConsole() {
 void clearDrawBuffer(const CHAR_INFO *value) {
     for(u32 x = 0; x < RES_X; x++) {
         for(u32 y = 0; y < RES_Y; y++) {
-            s_render_data.draw_buffer[x + y * RES_X] = *value;
+            s_render_data.back_buffer[x + y * RES_X] = *value;
         }
     }
 }
 
 void drawSprite(const Sprite *sprite) {
-    CHAR_INFO *       dst_buffer = s_render_data.draw_buffer;
+    CHAR_INFO *       dst_buffer = s_render_data.back_buffer;
     const CHAR_INFO * src_buffer = sprite->char_infos;
     const u32         size_x     = sprite->x_end - sprite->x_begin;
     const u32         size_y     = sprite->y_end - sprite->y_begin;
@@ -49,23 +50,44 @@ void drawSprite(const Sprite *sprite) {
         return;
     }
 
-    for(u32 x = x_begin, x1 = 0; x != x_end; x++, x1++) {
-        for(u32 y = y_begin, y1 = 0; y != y_end; y++, y1++) {
-            /* if char src char is transparent (ascii \0), dont change, otherwise set new char */
+    for(u32 y = y_begin, y1 = 0; y != y_end; y++, y1++) {
+        for(u32 x = x_begin, x1 = 0; x != x_end; x++, x1++) {
+            /* if char src char is transparent space " ", dont change, otherwise set new char */
             CHAR_INFO src_char = src_buffer[x1 + y1 * size_x];
             CHAR_INFO dst_char = dst_buffer[x + y * RES_X];
             dst_char.Attributes |= dst_char.Attributes;
-            dst_buffer[x + y * RES_X] = (src_char.Char.AsciiChar == '\0') ? dst_char : src_char;
+            dst_buffer[x + y * RES_X] = (src_char.Char.AsciiChar == ' ') ? dst_char : src_char;
         }
     }
 }
 
 i32 showDrawBuffer() {
-    const SMALL_RECT small_rect = {0, 0, RES_X, RES_Y};
+    const SMALL_RECT  small_rect   = {0, 0, RES_X, RES_Y};
+    const CHAR_INFO * back_buffer  = s_render_data.back_buffer;
+    CHAR_INFO *       front_buffer = s_render_data.front_buffer;
+
+    /* remove empty symbols */
+    for(u32 y = 0; y != RES_Y; y++) {
+        u32 space_count = 0;
+        /* remove spaces */
+        for(u32 front_x = 0, back_x = 0; back_x != RES_X; back_x++) {
+            CHAR_INFO c = back_buffer[back_x + y * RES_X];
+            front_buffer[front_x + y * RES_X] = c;
+            space_count += (c.Attributes == 0 && c.Char.UnicodeChar == L'\0') ? 1 : 0;
+            front_x     += (c.Attributes == 0 && c.Char.UnicodeChar == L'\0') ? 0 : 1;
+        }
+        /* adjust spaces in the end */
+        for(u32 x = RES_X - space_count; x != RES_X; x++) {
+            front_buffer[x + y * RES_X] = (CHAR_INFO) {
+                .Char = {.UnicodeChar = L' '},
+                .Attributes = 0
+            };
+        }
+    }
 
     if(!WriteConsoleOutputW(
         s_render_data.std_out, 
-        s_render_data.draw_buffer, 
+        s_render_data.front_buffer, 
         (COORD){RES_X, RES_Y}, 
         (COORD){0, 0}, 
         (PSMALL_RECT)&small_rect

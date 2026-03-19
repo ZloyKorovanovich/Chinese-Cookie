@@ -9,24 +9,24 @@ i32 main(i32 argc, char **argv) {
 
     CHAR_INFO clear_color = {
         .Char = {.AsciiChar = ' '},
-        .Attributes = BACKGROUND_GREEN
+        .Attributes = BACKGROUND_BLUE
     };
 
     CHAR_INFO test_sprite_buffer[] = {
         (CHAR_INFO) {
-            .Char = {.UnicodeChar = L'$'},
+            .Char = {.UnicodeChar = L'不'},
             .Attributes = FOREGROUND_BLUE
         },
         (CHAR_INFO) {
-            .Char = {.UnicodeChar = L'&'},
+            .Char = {.UnicodeChar = L'\0'},
+            .Attributes = 0
+        },
+        (CHAR_INFO) {
+            .Char = {.UnicodeChar = L'a'},
             .Attributes = FOREGROUND_BLUE
         },
         (CHAR_INFO) {
-            .Char = {.UnicodeChar = L'%'},
-            .Attributes = FOREGROUND_BLUE
-        },
-        (CHAR_INFO) {
-            .Char = {.UnicodeChar = L'@'},
+            .Char = {.UnicodeChar = L'b'},
             .Attributes = FOREGROUND_BLUE
         }
     };

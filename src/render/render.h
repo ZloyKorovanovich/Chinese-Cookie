@@ -1,5 +1,7 @@
 #include "../base.h"
 
+/* chinese symbols are 2 character wide, so you put 1 chinese symbol and 1 \0 after it.
+     usual symbols just go one by one */
 struct Sprite {
     u32 x_begin;
     u32 y_begin;
