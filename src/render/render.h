@@ -1,16 +1,29 @@
+#ifndef _RENDER_INCLUDED
+#define _RENDER_INCLUDED
+
 #include "../base.h"
 
-/* chinese symbols are 2 character wide, so you put 1 chinese symbol and 1 \0 after it.
-     usual symbols just go one by one */
-struct Sprite {
-    u32 x_begin;
-    u32 y_begin;
-    u32 x_end;
-    u32 y_end;
-    const CHAR_INFO *char_infos;
-};
+#define RESOLUTION_X   (60)
+#define RESOLUTION_Y   (20)
 
-i32 setupDrawConsole();
-void clearDrawBuffer(const CHAR_INFO *value);
-void drawSprite(const Sprite *sprite);
-i32 showDrawBuffer();
+typedef enum {
+    BM_OVERWRITE,
+    BM_OR,
+    BM_XOR,
+    BM_ADD
+} BlendingMode;
+
+typedef struct {
+    CHAR16* buffer;
+    UINTN   color;
+    INT32   x;
+    INT32   y;
+    INT32   size_x;
+    INT32   size_y;
+} Sprite;
+
+void clearFrameBuffer(CHAR16 value, UINTN color);
+void drawSprite(const Sprite* sprite, BlendingMode blending_mode);
+void showFrameBuffer(SIMPLE_TEXT_OUTPUT_INTERFACE* text_output);
+
+#endif
