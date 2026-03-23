@@ -65,7 +65,7 @@ void drawSprite(
             dst_char = dst_buffer[x + y * RESOLUTION_X];
             src_char = src_buffer[x_src + y_src * x_size];
             
-            dst_buffer      [x + y * RESOLUTION_X] = (src_char == 0) ? dst_char : src_char;
+            dst_buffer      [x + y * RESOLUTION_X] = (src_char == L'+') ? dst_char : src_char;
             if(src_char != 0) {
                 if(blending_mode == BM_OVERWRITE) {
                     dst_color_buffer[x + y * RESOLUTION_X] = src_color;
@@ -118,6 +118,6 @@ void showFrameBuffer(
             text_output->OutputString(text_output, temp_str);
         }
 
-        text_output->OutputString(text_output, L"\r\n");
+        text_output->OutputString(text_output, (CHAR16*)L"\r\n");
     }
 }

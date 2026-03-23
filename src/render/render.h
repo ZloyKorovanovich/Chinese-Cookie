@@ -3,8 +3,8 @@
 
 #include "../base.h"
 
-#define RESOLUTION_X   (60)
-#define RESOLUTION_Y   (20)
+#define RESOLUTION_X   (75)
+#define RESOLUTION_Y   (24)
 
 typedef enum {
     BM_OVERWRITE,

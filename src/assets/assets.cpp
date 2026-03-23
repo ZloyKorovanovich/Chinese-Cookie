@@ -10,7 +10,7 @@ typedef struct {
     UINTN      asset_count;
 } AssetsCtx;
 
-const  CHAR16*   c_file_name  = L"assets.txt";
+const  CHAR16*   c_file_name  = (CHAR16*)L"assets.txt";
 static AssetsCtx s_assets_ctx = {0};
 
 static EFI_STATUS assetToBuffer(
@@ -51,7 +51,7 @@ static EFI_STATUS assetToBuffer(
             continue;
         }
 
-        *dst_text_buffer++ = (read_char == L'+') ? 0 : read_char;
+        *dst_text_buffer++ = read_char;
         line_len++;
     }
 
@@ -101,11 +101,11 @@ static EFI_STATUS parseAssets(
                 (input < 'a' || input > 'z') &&
                 (input != '_')
             ) {
-                console_out->OutputString(console_out, L"unexpected symbol in asset name\r\n");
+                console_out->OutputString(console_out, (CHAR16*)L"unexpected symbol in asset name\r\n");
                 return EFI_NOT_STARTED;
             }
             if((UINTN)(buffer_begin - key_begin) == MAX_KEY_LEN - 1) {
-                console_out->OutputString(console_out, L"too long asset name\r\n");
+                console_out->OutputString(console_out, (CHAR16*)L"too long asset name\r\n");
             }
             continue;
         }
@@ -124,7 +124,7 @@ static EFI_STATUS parseAssets(
                     text_begin,
                     text_end
                 ) != EFI_SUCCESS) {
-                    console_out->OutputString(console_out, L"failed to add asset from file\r\n");
+                    console_out->OutputString(console_out, (CHAR16*)L"failed to add asset from file\r\n");
                     return EFI_NOT_STARTED;
                 }
 
@@ -158,7 +158,7 @@ EFI_STATUS loadAssets(
         file_protocol, 
         &root
     ) != EFI_SUCCESS) {
-        console_out->OutputString(console_out, L"failed to open root volume\r\n");
+        console_out->OutputString(console_out, (CHAR16*)L"failed to open root volume\r\n");
         goto fail;
     }
 
@@ -171,12 +171,12 @@ EFI_STATUS loadAssets(
     );
     if(efi_status != EFI_SUCCESS) {
         if(efi_status == EFI_NOT_FOUND) {
-            console_out->OutputString(console_out, L"failed to find assets file\r\n");
+            console_out->OutputString(console_out, (CHAR16*)L"failed to find assets file\r\n");
         }
         if(efi_status == EFI_ACCESS_DENIED) {
-            console_out->OutputString(console_out, L"failed no access to assets file\r\n");
+            console_out->OutputString(console_out, (CHAR16*)L"failed no access to assets file\r\n");
         }
-        console_out->OutputString(console_out, L"failed to open assets file\r\n");
+        console_out->OutputString(console_out, (CHAR16*)L"failed to open assets file\r\n");
         goto fail;
     }
 
@@ -186,13 +186,13 @@ EFI_STATUS loadAssets(
         &file_info_size,
         file_info_buffer
     ) != EFI_SUCCESS) {
-        console_out->OutputString(console_out, L"failed to get assets file info\r\n");
+        console_out->OutputString(console_out, (CHAR16*)L"failed to get assets file info\r\n");
         goto fail;
     }
 
     char8_buffer_size = ((EFI_FILE_INFO*)file_info_buffer)->FileSize;
     if(char8_buffer_size == 0) {
-        console_out->OutputString(console_out, L"assets file size is 0\r\n");
+        console_out->OutputString(console_out, (CHAR16*)L"assets file size is 0\r\n");
         goto success;
     }
 
@@ -201,7 +201,7 @@ EFI_STATUS loadAssets(
         char8_buffer_size,
         (VOID**)&char8_buffer
     ) != EFI_SUCCESS) {
-        console_out->OutputString(console_out, L"failed to allocate assets pool\r\n");
+        console_out->OutputString(console_out, (CHAR16*)L"failed to allocate assets pool\r\n");
         goto fail;
     }
 
@@ -210,7 +210,7 @@ EFI_STATUS loadAssets(
         &char8_buffer_size,
         char8_buffer
     ) != EFI_SUCCESS) {
-        console_out->OutputString(console_out, L"failed to read assets file\r\n");
+        console_out->OutputString(console_out, (CHAR16*)L"failed to read assets file\r\n");
         goto fail;
     }
 
@@ -225,7 +225,7 @@ EFI_STATUS loadAssets(
         char8_buffer_size * 2 + (sizeof(AssetView) + sizeof(CHAR16)) * MAX_KEY_LEN * MAX_ASSET_COUNT,
         (VOID**)&s_assets_ctx.pool_allocation
     ) != EFI_SUCCESS) {
-        console_out->OutputString(console_out, L"failed to allocate assets buffers");
+        console_out->OutputString(console_out, (CHAR16*)L"failed to allocate assets buffers");
         goto fail;
     }
     s_assets_ctx.key_table             = (CHAR16*   )((BYTE*)s_assets_ctx.pool_allocation                                                                                       );
@@ -240,7 +240,7 @@ EFI_STATUS loadAssets(
         char8_buffer + char8_buffer_size,
         console_out
     ) != EFI_SUCCESS) {
-        console_out->OutputString(console_out, L"failed to parse assets\r\n");
+        console_out->OutputString(console_out, (CHAR16*)L"failed to parse assets\r\n");
         goto fail;
     }
 
@@ -286,12 +286,12 @@ VOID printAssets(
     UINT32     i     = 0;
 
     for(i = count - 1; i != UINT32_MAX; i--) {
-        console_out->OutputString(console_out, L"key: ");
+        console_out->OutputString(console_out, (CHAR16*)L"key: ");
         console_out->OutputString(console_out, &names[i * MAX_KEY_LEN]);
-        console_out->OutputString(console_out, L"\r\n");
-        console_out->OutputString(console_out, L"text: \r\n");
+        console_out->OutputString(console_out, (CHAR16*)L"\r\n");
+        console_out->OutputString(console_out, (CHAR16*)L"text: \r\n");
         console_out->OutputString(console_out, views[i].buffer);
-        console_out->OutputString(console_out, L"\r\n");
+        console_out->OutputString(console_out, (CHAR16*)L"\r\n");
     }
 }
 

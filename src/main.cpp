@@ -21,7 +21,7 @@ VOID* memset(
     return dst;
 }
 
-EFI_STATUS EFIAPI efi_main(
+extern "C" EFI_STATUS EFIAPI efi_main(
     EFI_HANDLE        image_handle,
     EFI_SYSTEM_TABLE* system_table
 ) {
@@ -44,7 +44,7 @@ EFI_STATUS EFIAPI efi_main(
         &image_protocol_guid,
         (VOID**)&image_protocol
     ) != EFI_SUCCESS) {
-        system_table->ConOut->OutputString(system_table->ConOut, L"failed to handle image protocol\r\n");
+        system_table->ConOut->OutputString(system_table->ConOut, (CHAR16*)L"failed to handle image protocol\r\n");
         goto fail;
     }
 
@@ -53,7 +53,7 @@ EFI_STATUS EFIAPI efi_main(
         &file_protocol_guid, 
         (VOID**)&file_protocol
     ) != EFI_SUCCESS) {
-        system_table->ConOut->OutputString(system_table->ConOut, L"failed to locate file protocol\r\n");
+        system_table->ConOut->OutputString(system_table->ConOut, (CHAR16*)L"failed to locate file protocol\r\n");
         goto fail;
     }
 
@@ -63,7 +63,7 @@ EFI_STATUS EFIAPI efi_main(
         boot_services,
         system_table->ConOut
     ) != EFI_SUCCESS) {
-        system_table->ConOut->OutputString(system_table->ConOut, L"failed to locate load assets\r\n");
+        system_table->ConOut->OutputString(system_table->ConOut, (CHAR16*)L"failed to locate load assets\r\n");
         goto fail;
     }
 
@@ -76,26 +76,26 @@ EFI_STATUS EFIAPI efi_main(
     sprite_1 = (Sprite) {
         .buffer = asset_view_1->buffer,
         .color  = EFI_BLUE,
-        .size_x = asset_view_1->size_x,
-        .size_y = asset_view_1->size_y,
         .x = 13,
-        .y = 14
+        .y = 14,
+        .size_x = (INT32)asset_view_1->size_x,
+        .size_y = (INT32)asset_view_1->size_y
     };
     sprite_2 = (Sprite) {
         .buffer = asset_view_2->buffer,
         .color  = EFI_RED,
-        .size_x = asset_view_2->size_x,
-        .size_y = asset_view_2->size_y,
         .x = 0,
-        .y = 0
+        .y = 0,
+        .size_x = (INT32)asset_view_2->size_x,
+        .size_y = (INT32)asset_view_2->size_y
     };
     sprite_anim = (Sprite) {
         .buffer = NULL,
         .color  = EFI_GREEN,
-        .size_x = asset_view_anim[0]->size_x,
-        .size_y = asset_view_anim[0]->size_y,
         .x = 12,
-        .y = 12
+        .y = 12,
+        .size_x = (INT32)asset_view_anim[0]->size_x,
+        .size_y = (INT32)asset_view_anim[0]->size_y
     };
 
     while(1) {
@@ -113,6 +113,7 @@ EFI_STATUS EFIAPI efi_main(
     }
     unloadAssets(boot_services);
 
+    system_table->ConOut->OutputString(system_table->ConOut, (CHAR16*)L"NU Y NU\r\n");
     return EFI_SUCCESS;
 
     fail: {
