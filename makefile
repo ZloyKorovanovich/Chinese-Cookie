@@ -1,7 +1,7 @@
 build:
-	gcc -c -Iext/inc src/main.c -o main.o
-	gcc -c -Iext/inc src/render/render.c -o render.o
-	gcc -c -Iext/inc src/assets/assets.c -o assets.o
+	g++ -c -std=c++11 -Iext/inc src/main.cpp -o main.o
+	g++ -c -std=c++11 -Iext/inc src/render/render.cpp -o render.o
+	g++ -c -std=c++11 -Iext/inc src/assets/assets.cpp -o assets.o
 	ld -m i386pep --subsystem=10 -nostdlib -e efi_main main.o render.o assets.o -o root/efi/boot/bootx64.efi 
 	rm main.o
 	rm render.o
