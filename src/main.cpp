@@ -109,7 +109,7 @@ extern "C" EFI_STATUS EFIAPI efi_main(
         sprite_2.y = (sprite_2.y > RESOLUTION_Y + 10) ? 0 : sprite_2.y + 1;
         sprite_anim.buffer = asset_view_anim[(anim_id+=1) % 3]->buffer;
         showFrameBuffer(system_table->ConOut);
-        boot_services->Stall(10000);
+        boot_services->Stall(20000);
     }
     unloadAssets(boot_services);
 

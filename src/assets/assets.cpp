@@ -1,5 +1,16 @@
 #include "assets.h"
 
+/* pool_allocation       = address (handle) of pool allocation acquired from boot services in loadAssets
+   view_table            = AssetView structs array, containing data about assets sprites in char_buffer 
+   key_table             = CHAR16 string buffer that contains keys of fixed length layed one after another 
+   char_buffer           = size of whole char buffer allocated on pool                      
+   char_buffer_used_size = used size of char_buffer (data loaded from file size) 
+   asset_count           = number of assets in table also number of keys                                   
+   
+   keys are stored one after another in buffer like that:
+   [sizeof(CHAR16)*MAX_KEY_LEN][sizeof(CHAR16)*MAX_KEY_LEN]... repeat asset_count times                      
+   ^                           ^                           used  size of buffer os sizeof(CHAR16) * MAX_KEY_LEN * asset_count   
+   1 string start              2 string start              total size of buffer is sizeof(CHAR16) * MAX_KEY_LEN * MAX_ASSET_COUNT */
 typedef struct {
     VOID*      pool_allocation;
     AssetView* view_table;
@@ -296,5 +307,6 @@ VOID printAssets(
 }
 
 const AssetView* assetById(UINTN id) {
+    /* if asset id is valid return asset pointer, if not return NULL (check for out of range) */
     return (id < s_assets_ctx.asset_count) ? s_assets_ctx.view_table + id : NULL;
 }
