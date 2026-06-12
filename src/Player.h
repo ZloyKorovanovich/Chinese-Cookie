@@ -5,7 +5,7 @@
 
 struct Player {
     Vec2 position;
-    int hp = 100;
+    int hp = kDefaultPlayerHp;
 };
 
 #endif  // PLAYER_H_

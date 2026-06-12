@@ -9,12 +9,13 @@
 #include <string>
 #include <vector>
 
+#include "Config.h"
 #include "Sprite.h"
 
 class ConsoleRenderer {
 public:
-    static const int kWidth = 120;
-    static const int kHeight = 40;
+    static const int kWidth = kScreenWidth;
+    static const int kHeight = kScreenHeight;
 
     ConsoleRenderer();
 

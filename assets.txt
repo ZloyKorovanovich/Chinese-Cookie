@@ -1,3 +1,7 @@
+%animation:dragon%
+dragon_0
+dragon_1
+dragon_2
 %dragon_0%
       /\
   /\_/  \_/\
@@ -22,6 +26,10 @@
    \_/\/\_/
   < /|^^|\ >
    /_|__|_\
+%animation:octopus%
+octopus_0
+octopus_1
+octopus_2
 %octopus_0%
 +____+
 /0 0 \
@@ -30,7 +38,7 @@
 v+vv+v
 %octopus_1%
 +____+
-/^ ^ \
+/ ^ ^\
 \ V  /
 \\||//
  vvvv
@@ -44,25 +52,4 @@ v+vv+v
 +@@++
 @@@//
 \__/+
-%tentacle%
-+____+
-/0 0 \
-\ V  /
-//||\\
-v+vv+v
-%wtf_0%
-+___+
-/_ _\
-|0 0|
-\_-_/
-%wtf_1%
-+___+
-/^ ^\
-|0 0|
-\_^_/
-%wtf_2%
-+___+
-/^ ^\
-|0 0|
-\_O_/
 %%

@@ -5,13 +5,13 @@
 
 struct FlyingFood {
     FoodType type = FoodType::At;
-    char symbol = '@';
+    char symbol = kFoodAtSymbol;
 
     float x = 0.0f;
     float y = 0.0f;
     float target_x = 0.0f;
     float target_y = 0.0f;
-    float speed = 0.65f;
+    float speed = kDefaultFlyingFoodSpeed;
 
     int target_monster_index = -1;
     int target_need_index = -1;

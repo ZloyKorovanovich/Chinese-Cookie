@@ -8,17 +8,8 @@
 #include <thread>
 #include <vector>
 
-const int kMapX = 2;
-const int kMapY = 2;
-const int kMapWidth = 58;
-const int kMapHeight = 20;
-const int kPanelX = 64;
-const int kPanelY = 2;
-
-const int kPlayerMoveDelay = 3;
-
 static bool IsKeyDown(int virtual_key) {
-    return (GetAsyncKeyState(virtual_key) & 0x8000) != 0;
+    return (GetAsyncKeyState(virtual_key) & kKeyPressedMask) != 0;
 }
 
 
@@ -41,7 +32,7 @@ void Game::Run() {
         }
 
         Draw();
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        std::this_thread::sleep_for(std::chrono::milliseconds(kFrameDurationMs));
     }
 }
 
@@ -53,136 +44,21 @@ void Game::Reset() {
     previous_input = InputState{};
     defeat_reason.clear();
 
-    player.position = Vec2{4, 4};
-    player.hp = 100;
+    player.position = Vec2{};
+    player.hp = kDefaultPlayerHp;
+    settings = GameSettings{};
 
     flying_foods.clear();
 
-    if (LoadLevelFromFile("level.txt")) {
-        SetMessage("Level loaded from level.txt. Collect @, %, ^ food.");
+    if (LoadLevelFromFile(kLevelFileName)) {
+        SetMessage("Level loaded. Collect food and avoid the monsters.");
     } else {
-        BuildMap();
-        BuildFoods();
-        BuildMonsters();
-        SetMessage("level.txt was not loaded. Fallback level is running.");
+        TriggerDefeat("Level file was not loaded or has invalid data.");
     }
 }
 
 void Game::LoadAssets() {
-    assets.LoadFromFile("assets.txt");
-
-    if (!assets.HasSprite("missing")) {
-        assets.AddSprite("missing", Sprite{{"+---+", "| ? |", "+---+"}});
-    }
-
-    if (!assets.HasSprite("dragon_0")) {
-        assets.AddSprite("dragon_0", Sprite{{
-            "     /^^^^^/",
-            " <==[ o o ]==>",
-            "     / vv /",
-            "    /_/==/_",
-            "      /  /",
-            "   ^==|  |==^"
-        }});
-        assets.AddSprite("dragon_1", Sprite{{
-            "   /^/^^^/^/",
-            " <==[ ^ ^ ]==>",
-            "     / -- /",
-            "    /_/==/_",
-            "   <  |  |  >",
-            "     ^^^^^^"
-        }});
-        assets.AddSprite("dragon_2", Sprite{{
-            "     /^^^^^/",
-            " <==[ O O ]==>",
-            "     / ~~ /",
-            "    /_/==/_",
-            "   ^  |  |  ^",
-            "     /____/"
-        }});
-    }
-
-    if (!assets.HasSprite("octopus_0")) {
-        assets.AddSprite("octopus_0", Sprite{{" .---. ", "/ o o\\", "\\  ^ /", " /|||\\"}});
-        assets.AddSprite("octopus_1", Sprite{{" .---. ", "/ ^ ^\\", "\\  o /", "//|||\\\\"}});
-        assets.AddSprite("octopus_2", Sprite{{" .---. ", "/ O O\\", "\\  - /", "v ||| v"}});
-    }
-}
-
-void Game::BuildMap() {
-    map.assign(kMapHeight, std::string(kMapWidth, '.'));
-
-    for (int x = 0; x < kMapWidth; ++x) {
-        map[0][x] = '#';
-        map[kMapHeight - 1][x] = '#';
-    }
-
-    for (int y = 0; y < kMapHeight; ++y) {
-        map[y][0] = '#';
-        map[y][kMapWidth - 1] = '#';
-    }
-
-    auto set_wall_line = [this](int x1, int y, int x2) {
-        for (int x = x1; x <= x2; ++x) {
-            if (IsInsideMap(x, y)) {
-                map[y][x] = '#';
-            }
-        }
-    };
-
-    set_wall_line(13, 3, 21);
-    set_wall_line(41, 3, 49);
-    set_wall_line(12, 8, 19);
-    set_wall_line(37, 8, 44);
-    set_wall_line(17, 14, 25);
-}
-
-void Game::BuildFoods() {
-    foods.clear();
-    foods.push_back(Food{FoodType::At, Vec2{8, 5}, true});
-    foods.push_back(Food{FoodType::Percent, Vec2{22, 7}, true});
-    foods.push_back(Food{FoodType::Caret, Vec2{39, 7}, true});
-    foods.push_back(Food{FoodType::Caret, Vec2{6, 12}, true});
-    foods.push_back(Food{FoodType::At, Vec2{30, 12}, true});
-    foods.push_back(Food{FoodType::Percent, Vec2{49, 14}, true});
-    foods.push_back(Food{FoodType::Percent, Vec2{12, 16}, true});
-    foods.push_back(Food{FoodType::Caret, Vec2{35, 16}, true});
-}
-
-void Game::BuildMonsters() {
-    monsters.clear();
-
-    Monster dragon;
-    dragon.name = "Dragon";
-    dragon.map_symbol = '$';
-    dragon.position = Vec2{28, 5};
-    dragon.needs = {
-        FoodNeed{FoodType::At},
-        FoodNeed{FoodType::Percent},
-        FoodNeed{FoodType::Caret}
-    };
-    dragon.frame_names = assets.MakeFrameList("dragon", {"wtf_0", "wtf_1", "wtf_2"});
-    dragon.frame_delay = 7;
-    dragon.hunger_limit = 80;
-    dragon.damage = 4;
-    dragon.move_delay = 8;
-    monsters.push_back(dragon);
-
-    Monster octopus;
-    octopus.name = "Octopus";
-    octopus.map_symbol = '&';
-    octopus.position = Vec2{31, 10};
-    octopus.needs = {
-        FoodNeed{FoodType::Percent},
-        FoodNeed{FoodType::At},
-        FoodNeed{FoodType::Caret}
-    };
-    octopus.frame_names = assets.MakeFrameList("octopus", {"tentacle", "tentacle", "tentacle"});
-    octopus.frame_delay = 9;
-    octopus.hunger_limit = 95;
-    octopus.damage = 3;
-    octopus.move_delay = 10;
-    monsters.push_back(octopus);
+    assets.LoadFromFile(kAssetsFileName);
 }
 
 bool Game::LoadLevelFromFile(const std::string& file_name) {
@@ -198,9 +74,11 @@ bool Game::LoadLevelFromFile(const std::string& file_name) {
 }
 
 void Game::ApplyLevelData(const LevelData& level_data) {
+    settings = level_data.settings;
     map = level_data.map;
     foods = level_data.foods;
     player.position = level_data.player_start;
+    player.hp = settings.player_hp;
 
     monsters.clear();
     for (const MonsterLevelSpec& spec : level_data.monsters) {
@@ -211,22 +89,13 @@ void Game::ApplyLevelData(const LevelData& level_data) {
         monster.hunger_limit = spec.hunger_limit;
         monster.damage = spec.damage;
         monster.move_delay = spec.move_delay;
-        monster.frame_delay = (spec.map_symbol == '&') ? 9 : 7;
+        monster.frame_delay = spec.frame_delay;
 
         for (FoodType type : spec.needs) {
             monster.needs.push_back(FoodNeed{type});
         }
 
-        std::vector<std::string> fallback_names;
-        if (spec.map_symbol == '&') {
-            fallback_names = {"tentacle", "tentacle", "tentacle"};
-        } else if (spec.map_symbol == '$') {
-            fallback_names = {"dragon_0", "dragon_1", "dragon_2"};
-        } else {
-            fallback_names = {"missing", "missing", "missing"};
-        }
-
-        monster.frame_names = assets.MakeFrameList(spec.animation_prefix, fallback_names);
+        monster.frame_names = assets.GetAnimationFrames(spec.animation_name);
         monsters.push_back(monster);
     }
 }
@@ -304,7 +173,7 @@ void Game::TryHandlePlayerMovement(const InputState& input) {
     }
 
     TryMovePlayer(dx, dy);
-    player_move_cooldown = kPlayerMoveDelay;
+    player_move_cooldown = settings.player_move_delay;
 }
 
 void Game::TryMovePlayer(int dx, int dy) {
@@ -334,7 +203,7 @@ bool Game::IsWall(int x, int y) const {
     if (!IsInsideMap(x, y)) {
         return true;
     }
-    return map[y][x] == '#';
+    return map[y][x] == kWallCell;
 }
 
 bool Game::IsBlockedForMonster(int x, int y, int moving_monster_index) const {
@@ -418,7 +287,7 @@ void Game::UpdateMonsterMovement() {
         }
 
         ++monster.move_timer;
-        const int delay = monster.aggressive ? std::max(3, monster.move_delay / 2) : monster.move_delay;
+        const int delay = monster.aggressive ? std::max(settings.min_aggressive_move_delay, monster.move_delay / 2) : monster.move_delay;
         if (monster.move_timer < delay) {
             continue;
         }
@@ -459,7 +328,8 @@ void Game::UpdateMonsterMovement() {
 }
 
 void Game::UpdateHungerAndDamage() {
-    if (tick % 20 != 0) {
+    if (settings.hunger_update_interval <= 0 ||
+        tick % settings.hunger_update_interval != 0) {
         return;
     }
 
@@ -470,7 +340,7 @@ void Game::UpdateHungerAndDamage() {
             continue;
         }
 
-        monster.hunger += 3;
+        monster.hunger += settings.hunger_per_update;
         if (monster.hunger >= monster.hunger_limit) {
             monster.hunger = monster.hunger_limit;
             monster.aggressive = true;
@@ -494,7 +364,7 @@ void Game::UpdateFlyingFood() {
         const float dy = flying_food.target_y - flying_food.y;
         const float distance = std::sqrt(dx * dx + dy * dy);
 
-        if (distance <= flying_food.speed || distance < 0.05f) {
+        if (distance <= flying_food.speed || distance < kFoodDeliveryDistanceEpsilon) {
             flying_food.x = flying_food.target_x;
             flying_food.y = flying_food.target_y;
             const FlyingFood delivered_food = flying_food;
@@ -565,6 +435,7 @@ void Game::StartFoodFlight(Food& food) {
     flying_food.target_monster_index = target_monster_index;
     flying_food.target_need_index = target_need_index;
     flying_food.correct_food = correct_food;
+    flying_food.speed = settings.flying_food_speed;
     flying_food.active = true;
 
     flying_foods.push_back(flying_food);
@@ -676,7 +547,7 @@ void Game::CompleteCorrectMonsterNeed(int monster_index, int need_index, FoodTyp
         if (need.type == type && need.state == NeedState::Flying) {
             need.state = NeedState::Eaten;
             need.delivered_type = type;
-            monster.hunger = std::max(0, monster.hunger - 35);
+            monster.hunger = std::max(0, monster.hunger - settings.correct_food_hunger_reduction);
             if (monster.IsFed()) {
                 monster.aggressive = false;
                 monster.hunger = 0;
@@ -709,7 +580,7 @@ void Game::CompleteWrongMonsterNeed(int monster_index, int need_index, FoodType 
         }
     }
 
-    monster.hunger += 35;
+    monster.hunger += settings.wrong_food_hunger_increase;
     if (monster.hunger >= monster.hunger_limit) {
         monster.hunger = monster.hunger_limit;
         monster.aggressive = true;
@@ -782,57 +653,57 @@ void Game::Draw() {
 
 void Game::DrawMap() {
     const int map_height = static_cast<int>(map.size());
-    const int map_width = map_height > 0 ? static_cast<int>(map[0].size()) : kMapWidth;
+    const int map_width = map_height > 0 ? static_cast<int>(map[0].size()) : kScreenWidth;
 
-    renderer.DrawBox(kMapX - 1, kMapY - 1, map_width + 2, map_height + 2);
-    renderer.DrawText(kMapX, kMapY - 1, " World ");
+    renderer.DrawBox(kMapOriginX - 1, kMapOriginY - 1, map_width + 2, map_height + 2);
+    renderer.DrawText(kMapOriginX, kMapOriginY - 1, " World ");
 
     for (int y = 0; y < static_cast<int>(map.size()); ++y) {
         for (int x = 0; x < static_cast<int>(map[y].size()); ++x) {
-            renderer.DrawChar(kMapX + x, kMapY + y, map[y][x]);
+            renderer.DrawChar(kMapOriginX + x, kMapOriginY + y, map[y][x]);
         }
     }
 
     for (const Food& food : foods) {
         if (food.active) {
-            renderer.DrawChar(kMapX + food.position.x, kMapY + food.position.y, food.Symbol());
+            renderer.DrawChar(kMapOriginX + food.position.x, kMapOriginY + food.position.y, food.Symbol());
         }
     }
 
     for (const Monster& monster : monsters) {
-        renderer.DrawChar(kMapX + monster.position.x, kMapY + monster.position.y, monster.map_symbol);
+        renderer.DrawChar(kMapOriginX + monster.position.x, kMapOriginY + monster.position.y, monster.map_symbol);
     }
 
     for (const FlyingFood& food : flying_foods) {
         if (food.active) {
             const int x = static_cast<int>(std::round(food.x));
             const int y = static_cast<int>(std::round(food.y));
-            renderer.DrawChar(kMapX + x, kMapY + y, food.symbol);
+            renderer.DrawChar(kMapOriginX + x, kMapOriginY + y, food.symbol);
         }
     }
 
-    renderer.DrawChar(kMapX + player.position.x, kMapY + player.position.y, 'P');
+    renderer.DrawChar(kMapOriginX + player.position.x, kMapOriginY + player.position.y, kPlayerSymbol);
 }
 
 void Game::DrawHud() {
-    const int hud_y = kMapY + static_cast<int>(map.size()) + 3;
-    renderer.DrawBox(1, hud_y - 1, 118, 8);
-    renderer.DrawText(3, hud_y, "HP: " + std::to_string(player.hp));
-    renderer.DrawText(15, hud_y, "Controls: hold WASD/arrows to move | E info | R restart | Q/Esc quit");
-    renderer.DrawText(3, hud_y + 2, "Legend: P player | @ % ^ food | $ dragon | & octopus | # wall");
-    renderer.DrawText(3, hud_y + 4, "Message: " + message.substr(0, 100));
+    const int hud_y = kMapOriginY + static_cast<int>(map.size()) + kHudOffsetY;
+    renderer.DrawBox(kHudBoxX, hud_y - 1, kHudBoxWidth, kHudBoxHeight);
+    renderer.DrawText(kHudTextX, hud_y, "HP: " + std::to_string(player.hp));
+    renderer.DrawText(kHudControlsX, hud_y, "Controls: hold WASD/arrows to move | E info | R restart | Q/Esc quit");
+    renderer.DrawText(kHudTextX, hud_y + 2, "Legend: P player | @ % ^ food | monster symbols are loaded from level.txt | # wall");
+    renderer.DrawText(kHudTextX, hud_y + 4, "Message: " + message.substr(0, kHudMessageLimit));
 }
 
 void Game::DrawMonsterPanels() {
-    renderer.DrawBox(kPanelX - 1, kPanelY - 1, 54, 23);
-    renderer.DrawText(kPanelX, kPanelY - 1, " Monsters ");
+    renderer.DrawBox(kPanelOriginX - 1, kPanelOriginY - 1, kPanelWidth, kPanelHeight);
+    renderer.DrawText(kPanelOriginX, kPanelOriginY - 1, " Monsters ");
 
     for (int i = 0; i < static_cast<int>(monsters.size()); ++i) {
         const Monster& monster = monsters[i];
-        const int base_y = kPanelY + i * 11;
+        const int base_y = kPanelOriginY + i * kMonsterPanelStepY;
 
-        renderer.DrawText(kPanelX, base_y, monster.name + " [" + monster.map_symbol + "]");
-        DrawNeedBar(monster, kPanelX, base_y + 1);
+        renderer.DrawText(kPanelOriginX, base_y, monster.name + " [" + monster.map_symbol + "]");
+        DrawNeedBar(monster, kPanelOriginX, base_y + 1);
 
         std::string state = "Chasing";
         if (monster.IsFed()) {
@@ -840,13 +711,13 @@ void Game::DrawMonsterPanels() {
         } else if (monster.aggressive) {
             state = "Aggressive";
         }
-        renderer.DrawText(kPanelX, base_y + 2,
+        renderer.DrawText(kPanelOriginX, base_y + 2,
                            "State: " + state + " | Hunger: " + std::to_string(monster.hunger) + "/" +
                                std::to_string(monster.hunger_limit));
 
         if (!monster.frame_names.empty()) {
             const std::string& frame_name = monster.frame_names[monster.current_frame];
-            renderer.DrawSprite(kPanelX, base_y + 4, assets.GetSprite(frame_name));
+            renderer.DrawSprite(kPanelOriginX, base_y + 4, assets.GetSprite(frame_name));
         }
     }
 }
@@ -858,9 +729,9 @@ void Game::DrawNeedBar(const Monster& monster, int x, int y) {
     for (const FoodNeed& need : monster.needs) {
         char ch = FoodTypeToChar(need.type);
         if (need.state == NeedState::Flying || need.state == NeedState::WrongFlying) {
-            ch = '*';
+            ch = kNeedFlyingSymbol;
         } else if (need.state == NeedState::Eaten) {
-            ch = '_';
+            ch = kNeedEatenSymbol;
         } else if (need.state == NeedState::Wrong) {
             ch = FoodTypeToChar(need.delivered_type);
         }
@@ -873,23 +744,27 @@ void Game::DrawNeedBar(const Monster& monster, int x, int y) {
 }
 
 void Game::DrawEndScreen(const std::string& title, const std::string& subtitle) {
-    const int box_width = 68;
-    const int box_height = 13;
-    const int x = (ConsoleRenderer::kWidth - box_width) / 2;
-    const int y = (ConsoleRenderer::kHeight - box_height) / 2;
+    const int x = (ConsoleRenderer::kWidth - kEndBoxWidth) / 2;
+    const int y = (ConsoleRenderer::kHeight - kEndBoxHeight) / 2;
 
-    renderer.DrawBox(x, y, box_width, box_height);
-    renderer.DrawText(x + (box_width - static_cast<int>(title.size())) / 2, y + 2, title);
-    renderer.DrawText(x + (box_width - static_cast<int>(subtitle.size())) / 2, y + 5, subtitle);
+    renderer.DrawBox(x, y, kEndBoxWidth, kEndBoxHeight);
+    renderer.DrawText(x + (kEndBoxWidth - static_cast<int>(title.size())) / 2,
+                      y + kEndTitleOffsetY, title);
+    renderer.DrawText(x + (kEndBoxWidth - static_cast<int>(subtitle.size())) / 2,
+                      y + kEndSubtitleOffsetY, subtitle);
 
     if (title == "VICTORY") {
-        renderer.DrawText(x + 13, y + 7, "Balance is restored. The spirits are calm.");
-        renderer.DrawText(x + 18, y + 9, "All monsters are fed.");
+        renderer.DrawText(x + kEndVictoryTextX, y + kEndVictoryFirstTextY,
+                          "Balance is restored. The spirits are calm.");
+        renderer.DrawText(x + kEndVictorySecondTextX, y + kEndVictorySecondTextY,
+                          "All monsters are fed.");
     } else {
-        renderer.DrawText(x + 18, y + 8, "Try again and feed them faster.");
+        renderer.DrawText(x + kEndDefeatTextX, y + kEndDefeatTextY,
+                          "Try again and feed them faster.");
     }
 
-    renderer.DrawText(x + 18, y + box_height - 2, "Press R to restart or Q/Esc to quit.");
+    renderer.DrawText(x + kEndPromptTextX, y + kEndBoxHeight - kEndPromptOffsetFromBottom,
+                      "Press R to restart or Q/Esc to quit.");
 }
 
 int Game::DistanceSquared(Vec2 a, Vec2 b) const {
@@ -901,7 +776,7 @@ int Game::DistanceSquared(Vec2 a, Vec2 b) const {
 bool Game::IsAdjacent(Vec2 a, Vec2 b) const {
     const int dx = std::abs(a.x - b.x);
     const int dy = std::abs(a.y - b.y);
-    return dx <= 1 && dy <= 1;
+    return dx <= kAdjacentDistance && dy <= kAdjacentDistance;
 }
 
 int Game::Sign(int value) const {

@@ -9,7 +9,7 @@ bool ConsoleRenderer::Initialize() {
         return false;
     }
 
-    SetConsoleOutputCP(437);
+    SetConsoleOutputCP(kConsoleCodePage);
     ResizeConsole();
     HideCursor();
     Clear();

@@ -6,12 +6,27 @@
 ;   . empty cell
 ;   P player start
 ;   @ % ^ food
-;   $ dragon start
-;   & octopus start
+;   $ monster start defined in [Monsters]
+;   & monster start defined in [Monsters]
+;
+; Settings format:
+;   key=value
 ;
 ; Monster format:
-;   Name|MapSymbol|AnimationPrefix|Needs|HungerLimit|Damage|MoveDelay
-; Needs is a 3-character food list using @ % ^.
+;   Name|MapSymbol|AnimationName|Needs|HungerLimit|Damage|MoveDelay|FrameDelay
+; Needs is a food list using @ % ^.
+; AnimationName must match an %animation:name% block in assets.txt.
+
+[Settings]
+player_hp=100
+player_move_delay=3
+hunger_update_interval=20
+hunger_per_update=3
+correct_food_hunger_reduction=35
+wrong_food_hunger_increase=35
+min_aggressive_move_delay=3
+flying_food_speed=0.65
+[/Settings]
 
 [Map]
 ##########################################################
@@ -37,6 +52,6 @@
 [/Map]
 
 [Monsters]
-Dragon|$|dragon|@%^|80|4|8
-Octopus|&|octopus|%@^|95|3|10
+Dragon|$|dragon|@%^|80|4|8|7
+Octopus|&|octopus|%@^|95|3|10|9
 [/Monsters]

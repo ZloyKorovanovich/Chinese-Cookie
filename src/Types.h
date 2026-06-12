@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include "Config.h"
+
 struct Vec2 {
     int x = 0;
     int y = 0;
@@ -17,13 +19,13 @@ enum class FoodType {
 inline char FoodTypeToChar(FoodType type) {
     switch (type) {
         case FoodType::At:
-            return '@';
+            return kFoodAtSymbol;
         case FoodType::Percent:
-            return '%';
+            return kFoodPercentSymbol;
         case FoodType::Caret:
-            return '^';
+            return kFoodCaretSymbol;
         default:
-            return '?';
+            return kMissingFoodSymbol;
     }
 }
 
@@ -34,13 +36,13 @@ inline bool CharToFoodType(char ch, FoodType* type) {
     }
 
     switch (ch) {
-        case '@':
+        case kFoodAtSymbol:
             *type = FoodType::At;
             return true;
-        case '%':
+        case kFoodPercentSymbol:
             *type = FoodType::Percent;
             return true;
-        case '^':
+        case kFoodCaretSymbol:
             *type = FoodType::Caret;
             return true;
         default:
@@ -49,16 +51,11 @@ inline bool CharToFoodType(char ch, FoodType* type) {
 }
 
 inline std::string FoodTypeToName(FoodType type) {
-    switch (type) {
-        case FoodType::At:
-            return "@ food";
-        case FoodType::Percent:
-            return "% food";
-        case FoodType::Caret:
-            return "^ food";
-        default:
-            return "unknown food";
+    const char symbol = FoodTypeToChar(type);
+    if (symbol == kMissingFoodSymbol) {
+        return "unknown food";
     }
+    return std::string(1, symbol) + " food";
 }
 
 #endif  // TYPES_H_

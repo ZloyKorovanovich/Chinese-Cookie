@@ -41,9 +41,6 @@ private:
 
     void Reset();
     void LoadAssets();
-    void BuildMap();
-    void BuildFoods();
-    void BuildMonsters();
     bool LoadLevelFromFile(const std::string& file_name);
     void ApplyLevelData(const LevelData& level_data);
 
@@ -105,6 +102,7 @@ private:
 
     int tick = 0;
     int player_move_cooldown = 0;
+    GameSettings settings;
     std::string message;
     std::string defeat_reason;
 };
