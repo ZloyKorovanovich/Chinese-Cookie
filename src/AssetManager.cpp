@@ -2,24 +2,21 @@
 
 #include <fstream>
 
-namespace {
-
-std::string RemoveCarriageReturn(std::string line) {
+static std::string RemoveCarriageReturn(std::string line) {
     if (!line.empty() && line.back() == '\r') {
         line.pop_back();
     }
     return line;
 }
 
-bool IsBlockHeader(const std::string& line) {
+static bool IsBlockHeader(const std::string& line) {
     return line.size() >= 2 && line.front() == '%' && line.back() == '%';
 }
 
-std::string HeaderToName(const std::string& line) {
+static std::string HeaderToName(const std::string& line) {
     return line.substr(1, line.size() - 2);
 }
 
-}  // namespace
 
 bool AssetManager::LoadFromFile(const std::string& file_name) {
     std::ifstream input(file_name);
