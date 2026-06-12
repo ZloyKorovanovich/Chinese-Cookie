@@ -4,19 +4,19 @@
 #include "Types.h"
 
 struct FlyingFood {
-  FoodType type = FoodType::At;
-  char symbol = '@';
+    FoodType type = FoodType::At;
+    char symbol = '@';
 
-  float x = 0.0f;
-  float y = 0.0f;
-  float targetX = 0.0f;
-  float targetY = 0.0f;
-  float speed = 0.65f;
+    float x = 0.0f;
+    float y = 0.0f;
+    float target_x = 0.0f;
+    float target_y = 0.0f;
+    float speed = 0.65f;
 
-  int targetMonsterIndex = -1;
-  int targetNeedIndex = -1;
-  bool correctFood = true;
-  bool active = false;
+    int target_monster_index = -1;
+    int target_need_index = -1;
+    bool correct_food = true;
+    bool active = false;
 };
 
-#endif
+#endif  // FLYING_FOOD_H_

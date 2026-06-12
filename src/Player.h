@@ -4,8 +4,8 @@
 #include "Types.h"
 
 struct Player {
-  Vec2 position;
-  int hp = 100;
+    Vec2 position;
+    int hp = 100;
 };
 
-#endif
+#endif  // PLAYER_H_

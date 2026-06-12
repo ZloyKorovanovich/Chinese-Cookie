@@ -5,19 +5,21 @@
 #include <vector>
 
 struct Sprite {
-  std::vector<std::string> lines;
+    std::vector<std::string> lines;
 
-  int Width() const {
-    int width = 0;
-    for (const std::string& line : lines) {
-      if (static_cast<int>(line.size()) > width) {
-        width = static_cast<int>(line.size());
-      }
+    int Width() const {
+        int width = 0;
+        for (const std::string& line : lines) {
+            if (static_cast<int>(line.size()) > width) {
+                width = static_cast<int>(line.size());
+            }
+        }
+        return width;
     }
-    return width;
-  }
 
-  int Height() const { return static_cast<int>(lines.size()); }
+    int Height() const {
+        return static_cast<int>(lines.size());
+    }
 };
 
-#endif
+#endif  // SPRITE_H_

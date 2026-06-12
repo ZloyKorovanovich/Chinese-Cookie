@@ -18,92 +18,95 @@
 #include "Player.h"
 
 class Game {
- public:
-  bool Initialize();
-  void Run();
+public:
+    bool Initialize();
+    void Run();
 
- private:
-  enum class GameState { Playing, Victory, Defeat };
+private:
+    enum class GameState {
+        Playing,
+        Victory,
+        Defeat
+    };
 
-  struct InputState {
-    bool w = false;
-    bool a = false;
-    bool s = false;
-    bool d = false;
-    bool e = false;
-    bool r = false;
-    bool q = false;
-  };
+    struct InputState {
+        bool w = false;
+        bool a = false;
+        bool s = false;
+        bool d = false;
+        bool e = false;
+        bool r = false;
+        bool q = false;
+    };
 
-  void Reset();
-  void LoadAssets();
-  void BuildMap();
-  void BuildFoods();
-  void BuildMonsters();
-  bool LoadLevelFromFile(const std::string& fileName);
-  void ApplyLevelData(const LevelData& levelData);
+    void Reset();
+    void LoadAssets();
+    void BuildMap();
+    void BuildFoods();
+    void BuildMonsters();
+    bool LoadLevelFromFile(const std::string& file_name);
+    void ApplyLevelData(const LevelData& level_data);
 
-  void ProcessInput();
-  InputState ReadInput() const;
-  bool JustPressed(bool current, bool previous) const;
+    void ProcessInput();
+    InputState ReadInput() const;
+    bool JustPressed(bool current, bool previous) const;
 
-  void TryHandlePlayerMovement(const InputState& input);
-  void TryMovePlayer(int dx, int dy);
-  bool IsWall(int x, int y) const;
-  bool IsBlockedForMonster(int x, int y, int movingMonsterIndex) const;
-  bool IsMonsterAt(int x, int y, int ignoredMonsterIndex) const;
-  bool IsInsideMap(int x, int y) const;
+    void TryHandlePlayerMovement(const InputState& input);
+    void TryMovePlayer(int dx, int dy);
+    bool IsWall(int x, int y) const;
+    bool IsBlockedForMonster(int x, int y, int moving_monster_index) const;
+    bool IsMonsterAt(int x, int y, int ignored_monster_index) const;
+    bool IsInsideMap(int x, int y) const;
 
-  void Update();
-  void UpdateMonsterAnimations();
-  void UpdateHungerAndDamage();
-  void UpdateMonsterMovement();
-  void UpdateFlyingFood();
-  void CheckFoodPickup();
-  void CheckWinCondition();
-  void CheckPlayerNearMonsterDefeat();
+    void Update();
+    void UpdateMonsterAnimations();
+    void UpdateHungerAndDamage();
+    void UpdateMonsterMovement();
+    void UpdateFlyingFood();
+    void CheckFoodPickup();
+    void CheckWinCondition();
+    void CheckPlayerNearMonsterDefeat();
 
-  void StartFoodFlight(Food& food);
-  int FindCorrectTargetMonster(FoodType type, Vec2 start) const;
-  int FindHungriestMonster() const;
-  int ReserveCorrectMonsterNeed(int monsterIndex, FoodType type);
-  int ReserveWrongMonsterNeed(int monsterIndex, FoodType type);
-  void CompleteFoodDelivery(const FlyingFood& flyingFood);
-  void CompleteCorrectMonsterNeed(int monsterIndex, int needIndex,
-                                  FoodType type);
-  void CompleteWrongMonsterNeed(int monsterIndex, int needIndex, FoodType type);
-  void TriggerDefeat(const std::string& reason);
-  bool AllMonstersFed() const;
+    void StartFoodFlight(Food& food);
+    int FindCorrectTargetMonster(FoodType type, Vec2 start) const;
+    int FindHungriestMonster() const;
+    int ReserveCorrectMonsterNeed(int monster_index, FoodType type);
+    int ReserveWrongMonsterNeed(int monster_index, FoodType type);
+    void CompleteFoodDelivery(const FlyingFood& flying_food);
+    void CompleteCorrectMonsterNeed(int monster_index, int need_index, FoodType type);
+    void CompleteWrongMonsterNeed(int monster_index, int need_index, FoodType type);
+    void TriggerDefeat(const std::string& reason);
+    bool AllMonstersFed() const;
 
-  void Draw();
-  void DrawMap();
-  void DrawHud();
-  void DrawMonsterPanels();
-  void DrawNeedBar(const Monster& monster, int x, int y);
-  void DrawEndScreen(const std::string& title, const std::string& subtitle);
+    void Draw();
+    void DrawMap();
+    void DrawHud();
+    void DrawMonsterPanels();
+    void DrawNeedBar(const Monster& monster, int x, int y);
+    void DrawEndScreen(const std::string& title, const std::string& subtitle);
 
-  int DistanceSquared(Vec2 a, Vec2 b) const;
-  bool IsAdjacent(Vec2 a, Vec2 b) const;
-  int Sign(int value) const;
-  void SetMessage(const std::string& message);
+    int DistanceSquared(Vec2 a, Vec2 b) const;
+    bool IsAdjacent(Vec2 a, Vec2 b) const;
+    int Sign(int value) const;
+    void SetMessage(const std::string& new_message);
 
-  ConsoleRenderer renderer_;
-  AssetManager assets_;
+    ConsoleRenderer renderer;
+    AssetManager assets;
 
-  Player player_;
-  std::vector<std::string> map_;
-  std::vector<Food> foods_;
-  std::vector<Monster> monsters_;
-  std::vector<FlyingFood> flyingFoods_;
+    Player player;
+    std::vector<std::string> map;
+    std::vector<Food> foods;
+    std::vector<Monster> monsters;
+    std::vector<FlyingFood> flying_foods;
 
-  InputState previousInput_;
-  GameState state_ = GameState::Playing;
-  bool running_ = true;
+    InputState previous_input;
+    GameState state = GameState::Playing;
+    bool running = true;
 
-  int tick_ = 0;
-  int playerMoveCooldown_ = 0;
-  std::string message_;
-  std::string defeatReason_;
+    int tick = 0;
+    int player_move_cooldown = 0;
+    std::string message;
+    std::string defeat_reason;
 };
 
-#endif
+#endif  // GAME_H_

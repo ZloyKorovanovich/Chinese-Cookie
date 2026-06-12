@@ -4,11 +4,13 @@
 #include "Types.h"
 
 struct Food {
-  FoodType type = FoodType::At;
-  Vec2 position;
-  bool active = true;
+    FoodType type = FoodType::At;
+    Vec2 position;
+    bool active = true;
 
-  char Symbol() const { return FoodTypeToChar(type); }
+    char Symbol() const {
+        return FoodTypeToChar(type);
+    }
 };
 
-#endif
+#endif  // FOOD_H_

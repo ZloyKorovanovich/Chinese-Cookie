@@ -6,76 +6,84 @@
 
 #include "Types.h"
 
-enum class NeedState { Missing, Flying, Eaten, WrongFlying, Wrong };
+enum class NeedState {
+    Missing,
+    Flying,
+    Eaten,
+    WrongFlying,
+    Wrong
+};
 
 struct FoodNeed {
-  FoodType type = FoodType::At;
-  FoodType deliveredType = FoodType::At;
-  NeedState state = NeedState::Missing;
+    FoodType type = FoodType::At;
+    FoodType delivered_type = FoodType::At;
+    NeedState state = NeedState::Missing;
 };
 
 struct Monster {
-  std::string name;
-  char mapSymbol = 'M';
-  Vec2 position;
+    std::string name;
+    char map_symbol = 'M';
+    Vec2 position;
 
-  std::vector<FoodNeed> needs;
+    std::vector<FoodNeed> needs;
 
-  std::vector<std::string> frameNames;
-  int currentFrame = 0;
-  int animationTimer = 0;
-  int frameDelay = 8;
+    std::vector<std::string> frame_names;
+    int current_frame = 0;
+    int animation_timer = 0;
+    int frame_delay = 8;
 
-  int hunger = 0;
-  int hungerLimit = 100;
-  int damage = 4;
+    int hunger = 0;
+    int hunger_limit = 100;
+    int damage = 4;
 
-  int moveTimer = 0;
-  int moveDelay = 8;
-  bool aggressive = false;
+    int move_timer = 0;
+    int move_delay = 8;
+    bool aggressive = false;
 
-  bool IsFed() const {
-    for (const FoodNeed& need : needs) {
-      if (need.state != NeedState::Eaten) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  bool NeedsFood(FoodType type) const {
-    for (const FoodNeed& need : needs) {
-      if (need.type == type && need.state == NeedState::Missing) {
+    bool IsFed() const {
+        for (const FoodNeed& need : needs) {
+            if (need.state != NeedState::Eaten) {
+                return false;
+            }
+        }
         return true;
-      }
     }
-    return false;
-  }
 
-  int FirstMissingNeedIndex() const {
-    for (int i = 0; i < static_cast<int>(needs.size()); ++i) {
-      if (needs[i].state == NeedState::Missing) {
-        return i;
-      }
+    bool NeedsFood(FoodType type) const {
+        for (const FoodNeed& need : needs) {
+            if (need.type == type && need.state == NeedState::Missing) {
+                return true;
+            }
+        }
+        return false;
     }
-    return -1;
-  }
 
-  int ActiveNeedCount() const {
-    int count = 0;
-    for (const FoodNeed& need : needs) {
-      if (need.state != NeedState::Missing) {
-        ++count;
-      }
+    int FirstMissingNeedIndex() const {
+        for (int i = 0; i < static_cast<int>(needs.size()); ++i) {
+            if (needs[i].state == NeedState::Missing) {
+                return i;
+            }
+        }
+        return -1;
     }
-    return count;
-  }
 
-  bool HasAllNeedCellsActive() const {
-    return ActiveNeedCount() == static_cast<int>(needs.size());
-  }
+    int ActiveNeedCount() const {
+        int count = 0;
+        for (const FoodNeed& need : needs) {
+            if (need.state != NeedState::Missing) {
+                ++count;
+            }
+        }
+        return count;
+    }
 
-  bool IsFullyHungry() const { return hunger >= hungerLimit; }
+    bool HasAllNeedCellsActive() const {
+        return ActiveNeedCount() == static_cast<int>(needs.size());
+    }
+
+    bool IsFullyHungry() const {
+        return hunger >= hunger_limit;
+    }
 };
 
-#endif
+#endif  // MONSTER_H_

@@ -5,120 +5,120 @@
 namespace {
 
 std::string RemoveCarriageReturn(std::string line) {
-  if (!line.empty() && line.back() == '\r') {
-    line.pop_back();
-  }
-  return line;
+    if (!line.empty() && line.back() == '\r') {
+        line.pop_back();
+    }
+    return line;
 }
 
 bool IsBlockHeader(const std::string& line) {
-  return line.size() >= 2 && line.front() == '%' && line.back() == '%';
+    return line.size() >= 2 && line.front() == '%' && line.back() == '%';
 }
 
 std::string HeaderToName(const std::string& line) {
-  return line.substr(1, line.size() - 2);
+    return line.substr(1, line.size() - 2);
 }
 
 }  // namespace
 
-bool AssetManager::LoadFromFile(const std::string& fileName) {
-  std::ifstream input(fileName);
-  if (!input.is_open()) {
-    return false;
-  }
-
-  sprites_.clear();
-
-  std::string currentName;
-  Sprite currentSprite;
-  bool hasCurrentBlock = false;
-
-  std::string line;
-  while (std::getline(input, line)) {
-    line = RemoveCarriageReturn(line);
-
-    if (line == "%%") {
-      if (hasCurrentBlock) {
-        sprites_[currentName] = currentSprite;
-      }
-      return true;
+bool AssetManager::LoadFromFile(const std::string& file_name) {
+    std::ifstream input(file_name);
+    if (!input.is_open()) {
+        return false;
     }
 
-    if (IsBlockHeader(line)) {
-      if (hasCurrentBlock) {
-        sprites_[currentName] = currentSprite;
-      }
+    sprites.clear();
 
-      currentName = HeaderToName(line);
-      currentSprite = Sprite{};
-      hasCurrentBlock = true;
-      continue;
+    std::string current_name;
+    Sprite current_sprite;
+    bool has_current_block = false;
+
+    std::string line;
+    while (std::getline(input, line)) {
+        line = RemoveCarriageReturn(line);
+
+        if (line == "%%") {
+            if (has_current_block) {
+                sprites[current_name] = current_sprite;
+            }
+            return true;
+        }
+
+        if (IsBlockHeader(line)) {
+            if (has_current_block) {
+                sprites[current_name] = current_sprite;
+            }
+
+            current_name = HeaderToName(line);
+            current_sprite = Sprite{};
+            has_current_block = true;
+            continue;
+        }
+
+        if (has_current_block) {
+            current_sprite.lines.push_back(line);
+        }
     }
 
-    if (hasCurrentBlock) {
-      currentSprite.lines.push_back(line);
+    if (has_current_block) {
+        sprites[current_name] = current_sprite;
     }
-  }
 
-  if (hasCurrentBlock) {
-    sprites_[currentName] = currentSprite;
-  }
-
-  return !sprites_.empty();
+    return !sprites.empty();
 }
 
 bool AssetManager::HasSprite(const std::string& name) const {
-  return sprites_.find(name) != sprites_.end();
+    return sprites.find(name) != sprites.end();
 }
 
 const Sprite& AssetManager::GetSprite(const std::string& name) const {
-  const auto it = sprites_.find(name);
-  if (it == sprites_.end()) {
-    return missingSprite_;
-  }
-  return it->second;
+    const auto it = sprites.find(name);
+    if (it == sprites.end()) {
+        return missing_sprite;
+    }
+    return it->second;
 }
 
 void AssetManager::AddSprite(const std::string& name, const Sprite& sprite) {
-  sprites_[name] = sprite;
+    sprites[name] = sprite;
 }
 
 std::vector<std::string> AssetManager::MakeFrameList(
     const std::string& prefix,
-    const std::vector<std::string>& fallbackNames) const {
-  std::vector<std::string> result;
+    const std::vector<std::string>& fallback_names) const {
+    std::vector<std::string> result;
 
-  for (int i = 0; i < 3; ++i) {
-    const std::string name = prefix + "_" + std::to_string(i);
-    if (HasSprite(name)) {
-      result.push_back(name);
+    for (int i = 0; i < 3; ++i) {
+        const std::string name = prefix + "_" + std::to_string(i);
+        if (HasSprite(name)) {
+            result.push_back(name);
+        }
     }
-  }
 
-  if (static_cast<int>(result.size()) == 3) {
+    if (static_cast<int>(result.size()) == 3) {
+        return result;
+    }
+
+    result.clear();
+    for (const std::string& name : fallback_names) {
+        if (HasSprite(name)) {
+            result.push_back(name);
+        }
+    }
+
+    if (result.empty()) {
+        result.push_back("missing");
+        result.push_back("missing");
+        result.push_back("missing");
+    }
+
+    while (static_cast<int>(result.size()) < 3) {
+        result.push_back(result.back());
+    }
+
+    if (static_cast<int>(result.size()) > 3) {
+        result.resize(3);
+    }
+
     return result;
-  }
-
-  result.clear();
-  for (const std::string& name : fallbackNames) {
-    if (HasSprite(name)) {
-      result.push_back(name);
-    }
-  }
-
-  if (result.empty()) {
-    result.push_back("missing");
-    result.push_back("missing");
-    result.push_back("missing");
-  }
-
-  while (static_cast<int>(result.size()) < 3) {
-    result.push_back(result.back());
-  }
-
-  if (static_cast<int>(result.size()) > 3) {
-    result.resize(3);
-  }
-
-  return result;
 }
