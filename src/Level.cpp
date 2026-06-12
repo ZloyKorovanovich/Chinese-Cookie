@@ -7,22 +7,20 @@
 #include <string>
 #include <vector>
 
-namespace {
-
 enum class Section {
     None,
     Map,
     Monsters
 };
 
-std::string RemoveCarriageReturn(std::string line) {
+static std::string RemoveCarriageReturn(std::string line) {
     if (!line.empty() && line.back() == '\r') {
         line.pop_back();
     }
     return line;
 }
 
-std::string Trim(const std::string& value) {
+static std::string Trim(const std::string& value) {
     const std::string whitespace = " \t\r\n";
     const std::size_t first = value.find_first_not_of(whitespace);
     if (first == std::string::npos) {
@@ -33,12 +31,12 @@ std::string Trim(const std::string& value) {
     return value.substr(first, last - first + 1);
 }
 
-bool IsCommentOrEmpty(const std::string& line) {
+static bool IsCommentOrEmpty(const std::string& line) {
     const std::string trimmed = Trim(line);
     return trimmed.empty() || trimmed[0] == ';' || trimmed[0] == '#';
 }
 
-std::vector<std::string> Split(const std::string& value, char delimiter) {
+static std::vector<std::string> Split(const std::string& value, char delimiter) {
     std::vector<std::string> parts;
     std::stringstream stream(value);
     std::string part;
@@ -50,7 +48,7 @@ std::vector<std::string> Split(const std::string& value, char delimiter) {
     return parts;
 }
 
-int ToIntOrDefault(const std::string& value, int default_value) {
+static int ToIntOrDefault(const std::string& value, int default_value) {
     if (value.empty()) {
         return default_value;
     }
@@ -64,7 +62,7 @@ int ToIntOrDefault(const std::string& value, int default_value) {
     return static_cast<int>(parsed);
 }
 
-bool ParseNeeds(const std::string& value, std::vector<FoodType>* needs) {
+static bool ParseNeeds(const std::string& value, std::vector<FoodType>* needs) {
     needs->clear();
 
     for (char ch : value) {
@@ -77,7 +75,7 @@ bool ParseNeeds(const std::string& value, std::vector<FoodType>* needs) {
     return !needs->empty();
 }
 
-bool ParseMonsterLine(const std::string& line, MonsterLevelSpec* monster) {
+static bool ParseMonsterLine(const std::string& line, MonsterLevelSpec* monster) {
     const std::vector<std::string> parts = Split(line, '|');
     if (parts.size() < 4 || parts[0].empty() || parts[1].empty() || parts[2].empty()) {
         return false;
@@ -104,7 +102,7 @@ bool ParseMonsterLine(const std::string& line, MonsterLevelSpec* monster) {
     return true;
 }
 
-bool FindMonsterSpecBySymbol(std::vector<MonsterLevelSpec>* monsters, char symbol, int* index) {
+static bool FindMonsterSpecBySymbol(std::vector<MonsterLevelSpec>* monsters, char symbol, int* index) {
     for (int i = 0; i < static_cast<int>(monsters->size()); ++i) {
         if ((*monsters)[i].map_symbol == symbol) {
             *index = i;
@@ -115,7 +113,7 @@ bool FindMonsterSpecBySymbol(std::vector<MonsterLevelSpec>* monsters, char symbo
     return false;
 }
 
-void NormalizeMapWidth(std::vector<std::string>* map) {
+static void NormalizeMapWidth(std::vector<std::string>* map) {
     std::size_t width = 0;
     for (const std::string& row : *map) {
         width = std::max(width, row.size());
@@ -128,7 +126,7 @@ void NormalizeMapWidth(std::vector<std::string>* map) {
     }
 }
 
-bool ExtractObjectsFromMap(LevelData* level_data) {
+static bool ExtractObjectsFromMap(LevelData* level_data) {
     if (level_data->map.empty()) {
         return false;
     }
@@ -177,7 +175,6 @@ bool ExtractObjectsFromMap(LevelData* level_data) {
     return !level_data->monsters.empty();
 }
 
-}  // namespace
 
 bool LevelLoader::LoadFromFile(const std::string& file_name, LevelData* level_data) const {
     if (level_data == nullptr) {

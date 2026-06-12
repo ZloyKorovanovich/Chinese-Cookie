@@ -37,6 +37,6 @@
 [/Map]
 
 [Monsters]
-Dragon|$|dragon|@@%|80|4|8
-Octopus|&|octopus|%%^|95|3|10
+Dragon|$|dragon|@%^|80|4|8
+Octopus|&|octopus|%@^|95|3|10
 [/Monsters]

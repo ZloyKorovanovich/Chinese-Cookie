@@ -8,8 +8,6 @@
 #include <thread>
 #include <vector>
 
-namespace {
-
 const int kMapX = 2;
 const int kMapY = 2;
 const int kMapWidth = 58;
@@ -19,11 +17,10 @@ const int kPanelY = 2;
 
 const int kPlayerMoveDelay = 3;
 
-bool IsKeyDown(int virtual_key) {
+static bool IsKeyDown(int virtual_key) {
     return (GetAsyncKeyState(virtual_key) & 0x8000) != 0;
 }
 
-}  // namespace
 
 bool Game::Initialize() {
     if (!renderer.Initialize()) {
